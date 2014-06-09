@@ -1,16 +1,13 @@
 {
-    "sidebar": {
+    "swipable": {
         "version": "1.0.0",
         "files" : {
-            "build/sidebar.1.0.0.js" : [
-                "src/sidebar.js"
-            ],
-            "build/sidebar.1.0.0.css" : [
-                "src/sidebar.css"
+            "build/swipable.1.0.0.js" : [
+                "src/swipable.js"
             ]
         },
-        "module": "Nova.sidebar",
-        "src": "src/sidebar.js",
+        "module": "Nova.swipable",
+        "src": "src/swipable.js",
         "requires": {
             "widget": "module/widget/1.0.2/widget"
         }

@@ -1,4 +1,15 @@
-(function() {
+(function(root, factory) {
+if(typeof exports === 'object') {
+module.exports = factory();
+} else if(typeof define === 'function' && define.amd) {
+define(['module/widget/1.0.2/widget'], factory);
+} else {
+root['Swipable'] = factory();
+}
+})(this, function(Widget) {
+Widget = Widget || this.Widget;
+
+
     var prefix = (function () {
         var styles = window.getComputedStyle(document.documentElement, ''),
         pre = (Array.prototype.slice
@@ -294,5 +305,5 @@
 
     });
 
-    this.Swipable = Swipable;
-})();
+    return Swipable;
+});
