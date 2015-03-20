@@ -139,6 +139,7 @@
 
                     $body.on('touchmove', throttleDrag);
                     $body.on('touchend', release);
+                    $body.on('touchcancel', release);
 
                     frame = me.offset;
                     timeStamp = (new Date()).getTime();
@@ -190,6 +191,7 @@
 
                 $body.off('touchmove', throttleDrag);
                 $body.off('touchend', release);
+                $body.off('touchcancel', release);
 
                 me.trigger('release');
 

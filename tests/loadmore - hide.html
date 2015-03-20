@@ -121,22 +121,28 @@
 
             var loadmore = new Loadmore({
                 element: '.load-wrap',
-                mode: 'replace'
+                mode: 'replace',
+                showPreHint: false,
+                showNextHint: true
             });
             loadmore.after('prePage',function(){
-                page--;
-                $('.load-wrap .load-cont').html($("#poem"+page).html());
-                $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
-                loadmore.refresh();
+                setTimeout(function(){
+                    page--;
+                    $('.load-wrap .load-cont').html($("#poem"+page).html());
+                    $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
+                    loadmore.refresh();
+                },2000);
             });
             loadmore.after('nextPage',function(){
-                page++
-                $('.load-wrap .load-cont').html($("#poem"+page).html());
-                $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
-                loadmore.refresh();
-                if(page == 3){
-                    loadmore.set('isLastPage',true);
-                }
+                setTimeout(function(){
+                    page++
+                    $('.load-wrap .load-cont').html($("#poem"+page).html());
+                    $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
+                    loadmore.refresh();
+                    if(page == 3){
+                        loadmore.set('isLastPage',true);
+                    }
+                },2000);
             });
         </script>
     </body>

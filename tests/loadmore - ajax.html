@@ -18,28 +18,7 @@
     <body>
         <div class="load-wrap">
             <ul class="load-cont"  style="background-color:#f5574b">
-                <li>第一首</li>
-                <li>你是人间的四月天</li>
-                <li>我说你是人间的四月天；</li>
-                <li>笑响点亮了四面风；</li>
-                <li>轻灵在春的光艳中交舞着变。</li>
-                <li>你是四月早天里的云烟，</li>
-                <li>黄昏吹着风的软，</li>
-                <li>星子在无意中闪，</li>
-                <li>细雨点洒在花前。</li>
-                <li>那轻，那娉婷,你是，</li>
-                <li>鲜妍百花的冠冕你戴着，</li>
-                <li>你是天真，庄严，</li>
-                <li>你是夜夜的月圆。</li>
-                <li>雪化后那篇鹅黄，你像；</li>
-                <li>新鲜初放芽的绿，你是；</li>
-                <li>柔嫩喜悦，</li>
-                <li>水光浮动着你梦期待中白莲。</li>
-                <li>你是一树一树的花开，</li>
-                <li>是燕在梁间呢喃，</li>
-                <li>——你是爱，是暖，是希望，</li>
-                <li>你是人间的四月天！</li>
-            </ul>
+            </ul>            
         </div>
 
         <script src="http://s0.qhimg.com/static/24fee17ef5eeefee/zepto_touch_fx.112.js"></script>
@@ -121,23 +100,33 @@
 
             var loadmore = new Loadmore({
                 element: '.load-wrap',
-                mode: 'replace'
+                mode: 'append',
+                showPreHint: false,
+                showNextHint: false
             });
             loadmore.after('prePage',function(){
-                page--;
-                $('.load-wrap .load-cont').html($("#poem"+page).html());
-                $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
-                loadmore.refresh();
+                setTimeout(function(){
+                    page--;
+                    $('.load-wrap .load-cont').append($("#poem"+page).html());
+                    $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
+                    loadmore.refresh();
+                },2000);
             });
             loadmore.after('nextPage',function(){
-                page++
-                $('.load-wrap .load-cont').html($("#poem"+page).html());
-                $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
-                loadmore.refresh();
-                if(page == 3){
-                    loadmore.set('isLastPage',true);
-                }
+                setTimeout(function(){
+                    page++
+                    $('.load-wrap .load-cont').append($("#poem"+page).html());
+                    $('.load-wrap .load-cont').css("background-color",colors[(Math.round(Math.random()*10)%4)]);
+                    loadmore.refresh();
+                    if(page == 3){
+                        loadmore.set('isLastPage',true);
+                    }
+                },2000);
             });
+            setTimeout(function(){
+                $('.load-wrap .load-cont').html($("#poem0").html());
+                loadmore.refresh();
+            },1000);
         </script>
     </body>
 </html>
