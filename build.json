@@ -1,8 +1,8 @@
 {
     "swipable": {
-        "version": "1.0.0",
+        "version": "1.0.1",
         "files" : {
-            "build/swipable.1.0.0.js" : [
+            "build/swipable.1.0.1.js" : [
                 "src/swipable.js"
             ]
         },
