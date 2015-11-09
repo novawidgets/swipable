@@ -1,0 +1,194 @@
+<template is="dom-module">
+    <style>
+        :host {
+            display: block;
+        }
+    </style>
+    <template>
+        <div class="hint pre">{{_prehint}}</div>
+        <content></content>
+        <div class="hint next">{{_nexthint}}</div>
+    </template>
+    <script require-src="src/nova-swipable/main"></script>
+    <script>
+        Nova.Components.NovaLoadmore = Nova({
+            is: 'nova-loadmore',
+            behaviors: [Nova.Components.NovaSwipable],
+            props: {
+                threshold: {
+                    type: Number,
+                    value: 50
+                },
+                showNextHint: {
+                    type: Boolean,
+                    value: true
+                },
+                showPreHint: {
+                    type: Boolean,
+                    value: false
+                },
+                mode: {
+                    type: String,
+                    value: 'append'
+                },
+                page: {
+                    type: Number,
+                    value: 1
+                },
+                hintContent: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            firstPageText: '当前页为第一页',
+                            lastPageText: '当前页为最后一页',
+                            hintLoading: '加载中',
+                            nextPageHintDefault: '上拉加载第{$pn}页',
+                            nextPageHintPrepare: '释放加载第{$pn}页',
+                            prePageHintDefault: '下拉加载第{$pn}页',
+                            prePageHintPrepare: '释放加载第{$pn}页'
+                        };
+                    }
+                },
+                isLastPage: {
+                    type: Boolean,
+                    value: false
+                },
+                _prehint: String,
+                _nexthint: String,
+            },
+            createdHandler: function() {
+                this.isLoading = false;
+                this.hintContent = this.hintContent;
+                this.initialized = false; //组件是否初始化
+
+                //初始化上一页提示div
+                this._prehint = this.hintContent.firstPageText;
+
+                //初始化下一页提示divs
+                var nText = this.isLastPage?this.hintContent['lastPageText']:(this.hintContent['nextPageHintDefault'].replace('{$pn}',2));
+                this._nexthint = nText;
+
+                this.s = this;
+                this.s.$view = this.$element.children();   //因为添加了提示内容，需重新计算 滑动范围，view是滑动区域中的内容
+                this.s.min = this._getMin();
+                this.s.max = this.showPreHint?0:-this.$element.find('.hint.pre').height();//若显示preHint,则min为负的加载上一页的高度
+                if(this.s.min >= 0){// 若容器比内容宽或高，则不做初始化，将添加的提示div隐藏并重新计算高度
+                    this.$element.find('.hint').hide();     //隐藏提示
+                    this.s.min = this._getMin();
+                    this.initialized = false;
+                    return;
+                }
+                this._init();//若容器比内容长度小，则初始化，bool值兼容页面使用Ajax请求第一次数据之后的初始化
+            },
+            _getMin: function(){
+                var min = this.s.isVertical ? this.$element.height() - this._getContentSize('height') : this.$element.width() - this._getContentSize('width');
+                if(!this.showNextHint){
+                    min += this.$element.find('.hint.next').height();//加上下一页的高度
+                }
+                return min;
+            },
+
+            _getContentSize: function(dimension){
+                var size = 0;
+                for(var i = 0; i < this.s.$view.length; i++){
+                    size += this.s.$view.eq(i)[dimension]();
+                }
+                return size;
+            },
+
+            _init: function(){//初始化方法
+                this.s._initEvents();//初始化swipable的事件
+                this._initHandlers();//组件的初始化事件方法
+                if(!this.showPreHint)this.s._scroll(this.s.max);//当加载上一页不需显示时可隐藏该提示
+
+                $(window).on('resize', this.refresh);
+            },
+
+            refresh: function() {
+                if(!this.initialized){ //若组件未初始化，则初始化
+                    this._init();
+                    this.initialized = true;
+                }
+                this._changeHintCont('Default');
+                this.isLoading = false;
+                if(this.mode == 'replace'){              //若为替换模式，则滚动至顶部
+                    this.s._scroll(this.s.max);
+                }
+                else if(this.mode == 'append' && this.page !== 1){
+                    //var o = this.s.offset - this.$element.height();     //若为append模式，则滚动一屏
+                    //this.s._scroll((this.s.min > o)?this.s.min : o);   //内容不够一屏则滚动至底部
+                    this.s._scroll(this.s.min-this.threshold);//若为append模式则滚动一点点
+                }
+                this.s.min = this._getMin();
+            },
+
+            prePage: function(){
+                this.page = this.page - 1;
+                this.isLastPage = false;
+                this._changeHintCont('Loading','pre');
+            },
+
+            nextPage: function(){
+                this.page = this.page + 1;
+                this._changeHintCont('Loading','next');
+            },
+
+            _changeHintCont: function(status, flag){
+                if(status == 'Loading'){
+                    if(flag==='pre' && this.mode == 'replace'){
+                        this._prehint = this.hintContent['hintLoading'];
+                    }else if(flag==='next'){
+                        this._nexthint = (this.hintContent['hintLoading']);
+                    }
+                    this.isLoading = true;
+                    return;
+                }
+                if(this.mode == 'replace'){
+                    this._prehint = this.hintContent['prePageHint'+status];
+                }
+                this._nexthint = (this.hintContent['nextPageHint'+status]);
+                if(status !== 'Loading'){
+                    if(this.mode == 'replace'){
+                        this._prehint = (this.hintContent['prePageHint'+status].replace('{$pn}', this.page - 1));
+                    }
+                    this._nexthint = (this.hintContent['nextPageHint'+status].replace('{$pn}', this.page+1));
+                }
+                if(this.isLastPage){//若当前是最后一页
+                    this._nexthint = (this.hintContent['lastPageText']);
+                }
+                if(this.page <= 1 && this.mode == 'replace'){//若当前是第一页
+                    this._prehint = (this.hintContent['firstPageText']);
+                }
+            },
+
+            _initHandlers: function() {
+                var me = this;
+                me.on('_isLastPageChanged', function() {
+                    me._changeHintCont('Default');
+                });
+                me.s.on('nDrag',function(e){
+                    if(!me.isLoading){
+                        if(me.s.offset + me.threshold < me.s.min){//向上拉，拖拽超出threshold值
+                            me._changeHintCont('Prepare');
+                        }else if(me.s.offset < me.s.min){
+                            me._changeHintCont('Default');
+                        }
+                        if(me.s.offset - me.threshold > me.s.max){//向下拉，拖拽超出threshold值
+                            me._changeHintCont('Prepare');
+                        }else if(me.s.offset > me.s.max){
+                            me._changeHintCont('Default');
+                        }
+                    }
+                });
+                me.s.on('nRelease',function(e) {
+                    if((me.s.offset + me.threshold < me.s.min) && !me.isLoading && !me.isLastPage){//拖拽超出threshold值，则触发nextPage事件
+                        me.nextPage();
+                    }
+                    if(me.page > 1 && me.mode == 'replace' && (me.s.offset - me.threshold > me.s.max) && !me.isLoading){//拖拽超出threshold值，则触发prePage事件
+                        me.prePage();
+                    }
+                });
+            }
+        });
+    </script>
+</template>
